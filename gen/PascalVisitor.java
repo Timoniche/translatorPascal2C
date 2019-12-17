@@ -87,6 +87,12 @@ public interface PascalVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitType(PascalParser.TypeContext ctx);
 	/**
+	 * Visit a parse tree produced by {@link PascalParser#arrayType}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArrayType(PascalParser.ArrayTypeContext ctx);
+	/**
 	 * Visit a parse tree produced by {@link PascalParser#identifier}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

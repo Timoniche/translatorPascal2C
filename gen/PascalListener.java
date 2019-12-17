@@ -132,6 +132,16 @@ public interface PascalListener extends ParseTreeListener {
 	 */
 	void exitType(PascalParser.TypeContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PascalParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void enterArrayType(PascalParser.ArrayTypeContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#arrayType}.
+	 * @param ctx the parse tree
+	 */
+	void exitArrayType(PascalParser.ArrayTypeContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PascalParser#identifier}.
 	 * @param ctx the parse tree
 	 */

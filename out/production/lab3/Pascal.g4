@@ -27,6 +27,7 @@ options {
     static ArrayList<String> params = new ArrayList<>();
     static int indent = 0;
     static String curFunctionName = "";
+    static String arrSize = "";
 
     public static String fixedLengthString(String string, int length) {
         if (length == 0) return "";
@@ -92,7 +93,6 @@ procedure
 function
    : {String list = "";} FUNCTION identifier { curFunctionName = $identifier.text; }(formalParameterList {list = $formalParameterList.ret; })? COLON type SEMI compoundStatement {
         String indentBraces = fixedLengthString("", indent - 4);
-        //if (!list.equals("")) list += ", ";
         System.out.println(indentBraces + typesMap.get($type.text) + ' ' +
                     $identifier.text + " (" + list + ")");
         System.out.println(indentBraces + "{");
@@ -109,7 +109,6 @@ formalParameterList returns[String ret = ""]
    } (SEMI argsDeclaration {
        $ret += $argsDeclaration.ret;
    })* RPAREN
-   //{ $ret += ')'; }
    ;
 
 argsDeclaration returns[String ret = ""]
@@ -126,7 +125,6 @@ argsDeclaration returns[String ret = ""]
       }
       ;
 //______________________________________________________________________________________________________________________
-
 compoundStatement returns [String ret = ""]
    : BEGIN statements END {
        $ret += $statements.trCode;
@@ -143,7 +141,21 @@ variableDeclarationPart
    ;
 
 variableDeclaration returns[String ret = ""]
-      : identifierList COLON type {
+      :
+      identifierList COLON arrayType {
+            if (vars.size() > 0) {
+                $ret += typesMap.get($arrayType.ret) + ' ' + vars.get(0);
+            }
+            for (int i = 1; i < vars.size(); i++) {
+                $ret += ", " + vars.get(i);
+            }
+            if (vars.size() > 0) {
+                $ret += "[" + arrSize + "]" + ';';
+            }
+            vars.clear();
+      }
+      |
+      identifierList COLON type {
         if (vars.size() > 0) {
             varType.put(vars.get(0), $type.text);
             $ret += typesMap.get($type.text) + ' ' + vars.get(0);
@@ -157,6 +169,7 @@ variableDeclaration returns[String ret = ""]
         }
         vars.clear();
       }
+
       ;
 
 identifierList
@@ -166,9 +179,17 @@ identifierList
    (COMMA identifier { vars.add($identifier.text); })*
    ;
 
-type
-   : identifier
-   | (CHAR | BOOLEAN | INTEGER | REAL | STRING)
+type returns[String ret = ""]
+   : identifier { $ret = $identifier.text; }
+   | (CHAR | BOOLEAN | INTEGER {$ret = "integer";}| REAL | STRING)
+   | arrayType {$ret = $arrayType.ret; }
+   ;
+
+arrayType returns[String ret = ""]
+   : ARRAY LBRACK fst = NUM_INT DOTDOT snd = NUM_INT RBRACK OF type {
+       arrSize = $snd.text + "-" + $fst.text;
+       $ret = $type.ret;
+   }
    ;
 
 identifier
@@ -196,14 +217,14 @@ simpleStatement returns[String trCode = ""]
 assignmentStatement returns[String trCode = ""]
    : variable ASSIGN (expression {
     if ($variable.text.equals(curFunctionName)) {
-        $trCode = fixedLengthString("", indent) + "return " + $expression.text + ';';
+        $trCode = fixedLengthString("", indent) + "return " + $expression.ret + ';';
     } else {
         $trCode = fixedLengthString("", indent) + $variable.text + " = "
-        + $expression.text + ';';
+        + $expression.ret + ';';
     }
     }
    | procedureStatement { $trCode = fixedLengthString("", indent) + $variable.text + " = "
-    + $procedureStatement.trCode.substring(4); })
+    + $procedureStatement.trCode.substring(indent); })
    ;
 procedureStatement returns[String trCode = ""]
    : identifier (LPAREN parameterList RPAREN)? {
@@ -245,7 +266,7 @@ structuredStatement returns[String ret = ""]
 ifStatement returns[String ret = ""]
 //todo: (: ELSE statement)? why so
    : { indent += 4; } IF expression THEN fst = statement {
-   $ret += fixedLengthString("", indent - 4) + "if" + " (" + $expression.text + ") {\n" +
+   $ret += fixedLengthString("", indent - 4) + "if" + " (" + $expression.ret + ") {\n" +
    $fst.trCode + '\n' + fixedLengthString("", indent - 4) + "}";
    }
    (ELSE snd = statement {
@@ -280,18 +301,20 @@ finalValue
    : expression
    ;
 //______________________________________________________________________________________________________________________
-expression
-   : simpleExpression (relationaloperator expression)?
+expression returns[String ret = ""]
+   : simpleExpression { $ret += $simpleExpression.text; } (relationaloperator {
+       $ret += $relationaloperator.ret;
+   } expression { $ret += $expression.text; })?
    ;
 
-relationaloperator
-   : EQUAL
-   | NOT_EQUAL
-   | LT
-   | LE
-   | GE
-   | GT
-   | IN
+relationaloperator returns[String ret = ""]
+   : EQUAL { $ret = "=="; }
+   | NOT_EQUAL { $ret = "!="; }
+   | LT { $ret = "<"; }
+   | LE { $ret = "<="; }
+   | GE { $ret = ">="; }
+   | GT { $ret = ">"; }
+   | IN { $ret = "IN"; }
    ;
 simpleExpression
    : term (additiveoperator simpleExpression)?
@@ -300,6 +323,7 @@ additiveoperator
    : PLUS
    | MINUS
    | OR
+   | '%'
    ;
 
 term
@@ -330,6 +354,7 @@ bool
    : TRUE
    | FALSE
    ;
+
 
 //______________________________________________________________________________________________________________________
 

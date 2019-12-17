@@ -1,5 +1,8 @@
 var
-    a, b, mx, i, n, ans, c: integer;
+    a, b, mx, i, n, ans, c, g, out: integer;
+    r: array[1..10] of integer;
+
+
 
 procedure proc(e, f: integer);
 begin
@@ -19,9 +22,17 @@ begin
     nothing := 0;
 end;
 
+function gcd(p, q: integer): integer;
+begin
+    if q = 0 then g := p else g := gcd(q, p % q);
+    gcd := g;
+end;
+
 begin
     read(a, b, c);
     writeln(a + b);
-    ans:= max(a, b, c);
+    ans := max(a, b, c);
     writeln(ans);
+    out := gcd(a, b);
+    writeln(out);
 end.
