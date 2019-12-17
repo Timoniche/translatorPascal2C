@@ -37,7 +37,8 @@ options {
         int listSize = params.size();
         for (int i = 0; i < listSize; i++) {
             String type = varType.get(params.get(i));
-            if (type == null) { ret += "%?"; }
+            //deduction of expressions
+            if (type == null) { ret += "%d"; }
             else if (type.equals("integer")) {
                 ret += "%d";
             }
@@ -52,39 +53,100 @@ options {
 }
 //______________________________________________________________________________________________________________________
 program
-    : block DOT
+    : block
     ;
 block
-    : (fst = variableDeclarationPart {
-       //System.out.println($fst.text);
-    })*
-       snd = compoundStatement {
-       //System.out.println($snd.text);
-       }
+    : (variableDeclarationPart
+    | procedureOrFunction SEMI)*
+    main = compoundStatement DOT {
+        String indentBraces = fixedLengthString("", indent - 4);
+        System.out.println(indentBraces + "int main()");
+        System.out.println(indentBraces + "{");
+        System.out.print($main.ret);
+        System.out.println(indentBraces + "    return 0;");
+        System.out.println(indentBraces + "}");
+        indent -= 4;
+    }
     ;
+//Procedure & function block
+//______________________________________________________________________________________________________________________
+procedureOrFunction
+   : procedure
+   | function
+   ;
 
-compoundStatement
+procedure
+   : {String list = "";} PROCEDURE identifier (formalParameterList {list = $formalParameterList.ret; })? SEMI compoundStatement {
+        String indentBraces = fixedLengthString("", indent - 4);
+        System.out.println(indentBraces + "void " +
+            $identifier.text + list);
+        System.out.println(indentBraces + "{");
+        System.out.print($compoundStatement.ret);
+        System.out.println(indentBraces + "}");
+        indent -= 4;
+   }
+   ;
+
+function
+   : {String list = "";} FUNCTION identifier (formalParameterList {list = $formalParameterList.ret; })? COLON type SEMI compoundStatement {
+        String indentBraces = fixedLengthString("", indent - 4);
+        System.out.println(indentBraces + typesMap.get($type.text) + ' ' +
+                    $identifier.text + list);
+        System.out.println(indentBraces + "{");
+        System.out.print($compoundStatement.ret);
+        System.out.println(indentBraces + "}");
+        indent -= 4;
+   }
+   ;
+
+formalParameterList returns[String ret = ""]
+   : LPAREN argsDeclaration { $ret += '(' + $argsDeclaration.ret; } (SEMI argsDeclaration {
+       $ret += $argsDeclaration.ret;
+   })* RPAREN { $ret += ')'; }
+   ;
+
+argsDeclaration returns[String ret = ""]
+      : identifierList COLON type {
+        if (vars.size() > 0) {
+            varType.put(vars.get(0), $type.text);
+            $ret += typesMap.get($type.text) + ' ' + vars.get(0);
+        }
+        for (int i = 1; i < vars.size(); i++) {
+            varType.put(vars.get(i), $type.text);
+            $ret += ", " + typesMap.get($type.text) + ' ' + vars.get(i);
+        }
+        vars.clear();
+      }
+      ;
+//______________________________________________________________________________________________________________________
+
+compoundStatement returns [String ret = ""]
    : BEGIN statements END {
-       System.out.println("main()");
-       System.out.println('{');
-       System.out.print($statements.trCode);
-       System.out.print(fixedLengthString("", indent));
-       System.out.println("return 0;");
-       System.out.println('}');
-       indent -= 4;
+       $ret += $statements.trCode;
    }
    ;
 //Vars block
 //______________________________________________________________________________________________________________________
 variableDeclarationPart
-   : VAR variableDeclaration (SEMI variableDeclaration)* SEMI
+   : VAR variableDeclaration {
+       System.out.println($variableDeclaration.ret);
+   } (SEMI variableDeclaration {
+       System.out.println($variableDeclaration.ret);
+   })* SEMI
    ;
 
-variableDeclaration
+variableDeclaration returns[String ret = ""]
       : identifierList COLON type {
-        for (int i = 0; i < vars.size(); i++) {
+        if (vars.size() > 0) {
+            varType.put(vars.get(0), $type.text);
+            $ret += typesMap.get($type.text) + ' ' + vars.get(0);
+        }
+        for (int i = 1; i < vars.size(); i++) {
             varType.put(vars.get(i), $type.text);
-            System.out.println(typesMap.get($type.text) + ' ' + vars.get(i) + ';');
+            $ret += ", " + vars.get(i);
+        }
+        if (vars.size() > 0) {
+            $ret += ';';
         }
         vars.clear();
       }
@@ -120,12 +182,12 @@ statement returns[String trCode = ""]
    ;
 //______________________________________________________________________________________________________________________
 simpleStatement returns[String trCode = ""]
-   : assignmentStatement
+   : assignmentStatement { $trCode = $assignmentStatement.trCode; }
    | procedureStatement { $trCode = $procedureStatement.trCode; }
    | emptyStatement
    ;
-assignmentStatement
-   : variable ASSIGN expression
+assignmentStatement returns[String trCode = ""]
+   : variable ASSIGN expression { $trCode = fixedLengthString("", indent) + $variable.text + " = " + $expression.text + ';'; }
    ;
 procedureStatement returns[String trCode = ""]
    : identifier (LPAREN parameterList RPAREN)? {
@@ -225,7 +287,7 @@ factor
    | bool
    ;
 variable
-   : (AT identifier | identifier) (LBRACK expression (COMMA expression)* RBRACK | LBRACK2 expression (COMMA expression)* RBRACK2 | DOT identifier | POINTER)*
+   : (AT identifier | identifier | NUM_INT) (LBRACK expression (COMMA expression)* RBRACK | LBRACK2 expression (COMMA expression)* RBRACK2 | DOT identifier | POINTER)*
    ;
 bool
    : TRUE

@@ -1,0 +1,20 @@
+var
+    a, b : integer;
+
+procedure proc1(e, f: integer);
+begin
+end;
+
+function max(c, d: integer): integer;
+begin
+end;
+
+function nothing: integer;
+begin
+    nothing := 0;
+end;
+
+begin
+    read(a, b);
+    writeln(a + b);
+end.

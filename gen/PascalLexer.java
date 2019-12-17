@@ -1,4 +1,4 @@
-// Generated from /Users/dulaev/Desktop/lab3/src/Pascal.g4 by ANTLR 4.7.2
+// Generated from C:/Users/Timoniche/Desktop/translatorPascal2C/src\Pascal.g4 by ANTLR 4.7.2
 
     import java.util.Map;
     import java.util.HashMap;
@@ -143,7 +143,8 @@ public class PascalLexer extends Lexer {
 	        int listSize = params.size();
 	        for (int i = 0; i < listSize; i++) {
 	            String type = varType.get(params.get(i));
-	            if (type == null) { ret += "%?"; }
+	            //deduction of expressions
+	            if (type == null) { ret += "%d"; }
 	            else if (type.equals("integer")) {
 	                ret += "%d";
 	            }

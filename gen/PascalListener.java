@@ -1,4 +1,4 @@
-// Generated from /Users/dulaev/Desktop/lab3/src/Pascal.g4 by ANTLR 4.7.2
+// Generated from C:/Users/Timoniche/Desktop/translatorPascal2C/src\Pascal.g4 by ANTLR 4.7.2
 
     import java.util.Map;
     import java.util.HashMap;
@@ -31,6 +31,56 @@ public interface PascalListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitBlock(PascalParser.BlockContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascalParser#procedureOrFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterProcedureOrFunction(PascalParser.ProcedureOrFunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#procedureOrFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitProcedureOrFunction(PascalParser.ProcedureOrFunctionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascalParser#procedure}.
+	 * @param ctx the parse tree
+	 */
+	void enterProcedure(PascalParser.ProcedureContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#procedure}.
+	 * @param ctx the parse tree
+	 */
+	void exitProcedure(PascalParser.ProcedureContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascalParser#function}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunction(PascalParser.FunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#function}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunction(PascalParser.FunctionContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascalParser#formalParameterList}.
+	 * @param ctx the parse tree
+	 */
+	void enterFormalParameterList(PascalParser.FormalParameterListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#formalParameterList}.
+	 * @param ctx the parse tree
+	 */
+	void exitFormalParameterList(PascalParser.FormalParameterListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PascalParser#argsDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterArgsDeclaration(PascalParser.ArgsDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PascalParser#argsDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitArgsDeclaration(PascalParser.ArgsDeclarationContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PascalParser#compoundStatement}.
 	 * @param ctx the parse tree

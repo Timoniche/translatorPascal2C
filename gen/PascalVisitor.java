@@ -1,4 +1,4 @@
-// Generated from /Users/dulaev/Desktop/lab3/src/Pascal.g4 by ANTLR 4.7.2
+// Generated from C:/Users/Timoniche/Desktop/translatorPascal2C/src\Pascal.g4 by ANTLR 4.7.2
 
     import java.util.Map;
     import java.util.HashMap;
@@ -26,6 +26,36 @@ public interface PascalVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBlock(PascalParser.BlockContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascalParser#procedureOrFunction}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedureOrFunction(PascalParser.ProcedureOrFunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascalParser#procedure}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitProcedure(PascalParser.ProcedureContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascalParser#function}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunction(PascalParser.FunctionContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascalParser#formalParameterList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFormalParameterList(PascalParser.FormalParameterListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link PascalParser#argsDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitArgsDeclaration(PascalParser.ArgsDeclarationContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link PascalParser#compoundStatement}.
 	 * @param ctx the parse tree
