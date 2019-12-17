@@ -178,7 +178,7 @@ statements returns[String trCode]
    ;
 statement returns[String trCode = ""]
    : simpleStatement { $trCode = $simpleStatement.trCode; }
-   | structuredStatement
+   | structuredStatement { $trCode = $structuredStatement.ret; }
    ;
 //______________________________________________________________________________________________________________________
 simpleStatement returns[String trCode = ""]
@@ -221,13 +221,20 @@ emptyStatement
    :
    ;
 //______________________________________________________________________________________________________________________
-structuredStatement
+structuredStatement returns[String ret = ""]
    : compoundStatement
-   | ifStatement
+   | ifStatement { $ret = $ifStatement.ret; }
    | forStatement
    ;
-ifStatement
-   : IF expression THEN statement (: ELSE statement)?
+ifStatement returns[String ret = ""]
+//todo: (: ELSE statement)? why so
+   : IF expression THEN fst = statement {
+   $ret += fixedLengthString("", indent) + "if" + " (" + $expression.text + ") { " +
+           $fst.text + " }";
+   }
+   (ELSE snd = statement {
+     $ret += " else { " + $snd.text + " }";
+   })?
    ;
 
 forStatement

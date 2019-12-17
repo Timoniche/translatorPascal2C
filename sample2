@@ -1,12 +1,15 @@
 var
-    a, b : integer;
+    a, b, mx : integer;
 
 procedure proc1(e, f: integer);
 begin
 end;
 
-function max(c, d: integer): integer;
+function max(a, b, c: integer): integer;
 begin
+    if a > b then mx := a else mx := b;
+    if c > mx then mx := c;
+    max := mx;
 end;
 
 function nothing: integer;
