@@ -224,7 +224,7 @@ emptyStatement
 structuredStatement returns[String ret = ""]
    : compoundStatement
    | ifStatement { $ret = $ifStatement.ret; }
-   | forStatement
+   | forStatement { $ret = $forStatement.ret; }
    ;
 ifStatement returns[String ret = ""]
 //todo: (: ELSE statement)? why so
@@ -237,11 +237,24 @@ ifStatement returns[String ret = ""]
    })?
    ;
 
-forStatement
-   : FOR identifier ASSIGN forList DO statement
+forStatement returns[String ret = ""]
+   : FOR identifier {
+       indent += 4;
+       $ret += fixedLengthString("", indent - 4) + "for (" + typesMap.get(varType.get($identifier.text)) +
+       ' ' + $identifier.text;
+   } ASSIGN forList {
+       $ret += " = " + $forList.ret + " > " + $identifier.text + "; " +
+       $identifier.text + "++)\n";
+   } DO statement {
+       $ret += fixedLengthString("", indent - 4) + "{\n" + $statement.trCode + "\n" +
+       fixedLengthString("", indent - 4) + "}";
+       indent -= 4;
+   }
    ;
-forList
-   : initialValue (TO | DOWNTO) finalValue
+forList returns[String ret = ""]
+   : initialValue TO finalValue {
+       $ret += $initialValue.text + "; " + $finalValue.text;
+   }
    ;
 initialValue
    : expression

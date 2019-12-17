@@ -1,8 +1,10 @@
 var
-    a, b, mx : integer;
+    a, b, mx, i : integer;
 
-procedure proc1(e, f: integer);
+procedure proc(e, f: integer);
 begin
+    for i := 1 to n do
+        writeln(e);
 end;
 
 function max(a, b, c: integer): integer;
