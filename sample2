@@ -1,5 +1,5 @@
 var
-    a, b, mx, i : integer;
+    a, b, mx, i, n, ans, c: integer;
 
 procedure proc(e, f: integer);
 begin
@@ -20,6 +20,8 @@ begin
 end;
 
 begin
-    read(a, b);
+    read(a, b, c);
     writeln(a + b);
+    ans:= max(a, b, c);
+    writeln(ans);
 end.

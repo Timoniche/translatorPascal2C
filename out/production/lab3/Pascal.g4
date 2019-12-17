@@ -26,6 +26,7 @@ options {
     static ArrayList<String> vars = new ArrayList<>();
     static ArrayList<String> params = new ArrayList<>();
     static int indent = 0;
+    static String curFunctionName = "";
 
     public static String fixedLengthString(String string, int length) {
         if (length == 0) return "";
@@ -44,8 +45,9 @@ options {
             }
         }
         if (lnNeeded) {ret += "\\n"; }
+        if (listSize > 0) ret += "\"";
         for (int i = 0; i < listSize; i++) {
-            if (refsNeeded) {ret += "\", &"; } else {ret += "\", ";}
+            if (refsNeeded) {ret += ", &"; } else {ret += ", ";}
             ret += params.get(i);
         }
         return ret;
@@ -53,7 +55,7 @@ options {
 }
 //______________________________________________________________________________________________________________________
 program
-    : block
+    : { System.out.println("#include <stdio.h>"); }block
     ;
 block
     : (variableDeclarationPart
@@ -79,7 +81,7 @@ procedure
    : {String list = "";} PROCEDURE identifier (formalParameterList {list = $formalParameterList.ret; })? SEMI compoundStatement {
         String indentBraces = fixedLengthString("", indent - 4);
         System.out.println(indentBraces + "void " +
-            $identifier.text + list);
+            $identifier.text + " (" + list + ")");
         System.out.println(indentBraces + "{");
         System.out.print($compoundStatement.ret);
         System.out.println(indentBraces + "}");
@@ -88,10 +90,11 @@ procedure
    ;
 
 function
-   : {String list = "";} FUNCTION identifier (formalParameterList {list = $formalParameterList.ret; })? COLON type SEMI compoundStatement {
+   : {String list = "";} FUNCTION identifier { curFunctionName = $identifier.text; }(formalParameterList {list = $formalParameterList.ret; })? COLON type SEMI compoundStatement {
         String indentBraces = fixedLengthString("", indent - 4);
+        //if (!list.equals("")) list += ", ";
         System.out.println(indentBraces + typesMap.get($type.text) + ' ' +
-                    $identifier.text + list);
+                    $identifier.text + " (" + list + ")");
         System.out.println(indentBraces + "{");
         System.out.print($compoundStatement.ret);
         System.out.println(indentBraces + "}");
@@ -100,9 +103,13 @@ function
    ;
 
 formalParameterList returns[String ret = ""]
-   : LPAREN argsDeclaration { $ret += '(' + $argsDeclaration.ret; } (SEMI argsDeclaration {
+   : LPAREN argsDeclaration {
        $ret += $argsDeclaration.ret;
-   })* RPAREN { $ret += ')'; }
+       //$ret += '(' + $argsDeclaration.ret;
+   } (SEMI argsDeclaration {
+       $ret += $argsDeclaration.ret;
+   })* RPAREN
+   //{ $ret += ')'; }
    ;
 
 argsDeclaration returns[String ret = ""]
@@ -187,7 +194,16 @@ simpleStatement returns[String trCode = ""]
    | emptyStatement
    ;
 assignmentStatement returns[String trCode = ""]
-   : variable ASSIGN expression { $trCode = fixedLengthString("", indent) + $variable.text + " = " + $expression.text + ';'; }
+   : variable ASSIGN (expression {
+    if ($variable.text.equals(curFunctionName)) {
+        $trCode = fixedLengthString("", indent) + "return " + $expression.text + ';';
+    } else {
+        $trCode = fixedLengthString("", indent) + $variable.text + " = "
+        + $expression.text + ';';
+    }
+    }
+   | procedureStatement { $trCode = fixedLengthString("", indent) + $variable.text + " = "
+    + $procedureStatement.trCode.substring(4); })
    ;
 procedureStatement returns[String trCode = ""]
    : identifier (LPAREN parameterList RPAREN)? {
@@ -208,7 +224,7 @@ procedureStatement returns[String trCode = ""]
             $trCode += ");";
             break;
          default:
-            $trCode += funName + '(' + listSize + ')';
+            $trCode += funName + '(' + $parameterList.text + ");";
             break;
      }
      params.clear();
@@ -228,13 +244,14 @@ structuredStatement returns[String ret = ""]
    ;
 ifStatement returns[String ret = ""]
 //todo: (: ELSE statement)? why so
-   : IF expression THEN fst = statement {
-   $ret += fixedLengthString("", indent) + "if" + " (" + $expression.text + ") { " +
-           $fst.text + " }";
+   : { indent += 4; } IF expression THEN fst = statement {
+   $ret += fixedLengthString("", indent - 4) + "if" + " (" + $expression.text + ") {\n" +
+   $fst.trCode + '\n' + fixedLengthString("", indent - 4) + "}";
    }
    (ELSE snd = statement {
-     $ret += " else { " + $snd.text + " }";
+   $ret += " else {\n" + $snd.trCode + '\n' + fixedLengthString("", indent - 4) + "}";
    })?
+   { indent -= 4; }
    ;
 
 forStatement returns[String ret = ""]

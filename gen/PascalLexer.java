@@ -132,6 +132,7 @@ public class PascalLexer extends Lexer {
 	    static ArrayList<String> vars = new ArrayList<>();
 	    static ArrayList<String> params = new ArrayList<>();
 	    static int indent = 0;
+	    static String curFunctionName = "";
 
 	    public static String fixedLengthString(String string, int length) {
 	        if (length == 0) return "";
@@ -150,8 +151,9 @@ public class PascalLexer extends Lexer {
 	            }
 	        }
 	        if (lnNeeded) {ret += "\\n"; }
+	        if (listSize > 0) ret += "\"";
 	        for (int i = 0; i < listSize; i++) {
-	            if (refsNeeded) {ret += "\", &"; } else {ret += "\", ";}
+	            if (refsNeeded) {ret += ", &"; } else {ret += ", ";}
 	            ret += params.get(i);
 	        }
 	        return ret;
